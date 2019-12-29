@@ -42,20 +42,31 @@ namespace vozCompetitions
                 if (message.Text.Split(' ', 3)[0].Trim() == "/newcompetition" && message.From.Id == 650818972)
                     try
                     {
-                        Competition competition = new Competition()
+                        if (AccessCompetition.Exists(message.Text.Split(' ', 3)[1].Trim()))
                         {
-                            Hashtag = message.Text.Split(' ', 3)[1].Trim(),
-                            Name = message.Text.Split(' ', 3)[2].Trim(),
-                            Status = "Opening"
-                        };
+                            await vozCompetitionsBot.SendTextMessageAsync(
+                                message.Chat,
+                                $"Hashtag {message.Text.Split(' ', 3)[1].Trim()} đã tồn tại, vui lòng chọn hashtag khác.",
+                                replyToMessageId: message.MessageId
+                            );
+                        }
+                        else
+                        {
+                            Competition competition = new Competition()
+                            {
+                                Hashtag = message.Text.Split(' ', 3)[1].Trim(),
+                                Name = message.Text.Split(' ', 3)[2].Trim(),
+                                Status = "Opening"
+                            };
 
-                        AccessCompetition.Create(competition);
+                            AccessCompetition.Create(competition);
 
-                        await vozCompetitionsBot.SendTextMessageAsync(
-                            message.Chat,
-                            $"Cuộc thi: {competition.Name}\nHashtag: {competition.Hashtag}\n\nBẮT ĐẦU!!!",
-                            replyToMessageId: message.MessageId
-                        );
+                            await vozCompetitionsBot.SendTextMessageAsync(
+                                message.Chat,
+                                $"Cuộc thi: {competition.Name}\nHashtag: {competition.Hashtag}\n\nBẮT ĐẦU!!!",
+                                replyToMessageId: message.MessageId
+                            );
+                        }
                     }
                     catch (NullReferenceException)
                     {

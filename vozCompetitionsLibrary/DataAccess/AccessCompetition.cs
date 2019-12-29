@@ -40,7 +40,7 @@ namespace vozCompetitionsLibrary.DataAccess
 
         public static string GetStatus(string hashtag)
         {
-            string status = "new";
+            string status = "";
             foreach (Competition competition in Get())
                 if (competition.Hashtag == hashtag)
                 {
@@ -48,6 +48,14 @@ namespace vozCompetitionsLibrary.DataAccess
                     break;
                 }
             return status;
+        }
+
+        public static bool Exists(string hashtag)
+        {
+            foreach (Competition competition in Get())
+                if (competition.Hashtag == hashtag)
+                    return true;
+            return false;
         }
     }
 }
