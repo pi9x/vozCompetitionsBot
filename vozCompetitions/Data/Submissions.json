@@ -1,0 +1,37 @@
+[
+  {
+    "CompetitionHashtag": "#test1",
+    "UserId": 650818972,
+    "UserInfo": "Sugar Tăng  @clesor",
+    "MessageId": 723,
+    "Point": 1
+  },
+  {
+    "CompetitionHashtag": "#test2",
+    "UserId": 650818972,
+    "UserInfo": "Sugar Tăng  @clesor",
+    "MessageId": 30265,
+    "Point": 2
+  },
+  {
+    "CompetitionHashtag": "#test3",
+    "UserId": 650818972,
+    "UserInfo": "Sugar Tăng  @clesor",
+    "MessageId": 30281,
+    "Point": 2
+  },
+  {
+    "CompetitionHashtag": "#test3",
+    "UserId": 650818972,
+    "UserInfo": "Sugar Tăng  @clesor",
+    "MessageId": 30285,
+    "Point": 2
+  },
+  {
+    "CompetitionHashtag": "#test4",
+    "UserId": 650818972,
+    "UserInfo": "Sugar Tăng  @clesor",
+    "MessageId": 7,
+    "Point": 1
+  }
+]
