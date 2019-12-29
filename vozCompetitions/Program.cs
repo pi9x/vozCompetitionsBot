@@ -37,7 +37,7 @@ namespace vozCompetitions
             if (message == null) return;
 
             // ADD NEW COMPETITION - My Telegram ID: 650818972
-            // Format: /newcompetition | #hashtag | Competition name
+            // Command format: /newcompetition #hashtag Competition name
             if (message.Text != null)
                 if (message.Text.Split(' ', 3)[0].Trim() == "/newcompetition" && message.From.Id == 650818972)
                     try
@@ -68,7 +68,7 @@ namespace vozCompetitions
 
 
             // LIST ALL COMPETITIONS
-            // Format: /listcompetition
+            // Command: /listcompetition
             if (message.Text != null)
                 if (message.Text == "/listcompetition")
                 {
@@ -91,7 +91,7 @@ namespace vozCompetitions
 
 
             // CLOSE COMPETITION - - My Telegram ID: 650818972
-            // Format: /close #hashtag
+            // Command format: /close #hashtag
             if (message.Text != null)
                 if (message.Text.Split(' ')[0].Trim() == "/close" && message.From.Id == 650818972)
                     try
@@ -118,7 +118,7 @@ namespace vozCompetitions
 
 
             // ADD NEW SUBMISSION
-            // Photo and #hashtag
+            // Photo with #hashtag
             if (message.Caption != null)
             {
                 string hashtag = message.Caption.Split(' ')[0];
@@ -155,7 +155,7 @@ namespace vozCompetitions
 
 
             // SHOW RESULT
-            // Format: /result #hashtag
+            // Command format: /result #hashtag
             if (message.Text != null)
                 if (message.Text.Split(' ')[0] == "/result")
                     try
