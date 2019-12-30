@@ -223,6 +223,7 @@ namespace vozCompetitions
             Vote vote = new Vote()
             {
                 UserId = callback.From.Id,
+                ChatId = callback.Message.Chat.Id,
                 MessageId = callback.Message.ReplyToMessage.MessageId
             };
 
