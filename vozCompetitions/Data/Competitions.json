@@ -1,22 +1,2 @@
 [
-  {
-    "Hashtag": "#test1",
-    "Name": "Test 1",
-    "Status": "Closed"
-  },
-  {
-    "Hashtag": "#test2",
-    "Name": "Test 2",
-    "Status": "Opening"
-  },
-  {
-    "Hashtag": "#test3",
-    "Name": "Test 3",
-    "Status": "Opening"
-  },
-  {
-    "Hashtag": "#test4",
-    "Name": "Test 4",
-    "Status": "Opening"
-  }
 ]

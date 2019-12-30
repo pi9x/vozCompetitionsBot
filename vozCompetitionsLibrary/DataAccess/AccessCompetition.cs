@@ -50,6 +50,18 @@ namespace vozCompetitionsLibrary.DataAccess
             return status;
         }
 
+        public static int GetOwner(string hashtag)
+        {
+            int ownerId = 0;
+            foreach (Competition competition in Get())
+                if (competition.Hashtag == hashtag)
+                {
+                    ownerId = competition.UserId;
+                    break;
+                }
+            return ownerId;
+        }
+
         public static bool Exists(string hashtag)
         {
             foreach (Competition competition in Get())

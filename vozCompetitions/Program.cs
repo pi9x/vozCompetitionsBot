@@ -36,17 +36,18 @@ namespace vozCompetitions
             var message = messageEvent.Message;
             if (message == null) return;
 
-            // ADD NEW COMPETITION - My Telegram ID: 650818972
+            // ADD NEW COMPETITION
             // Command format: /newcompetition #hashtag Competition name
             if (message.Text != null)
-                if (message.Text.Split(' ', 3)[0].Trim() == "/newcompetition" && message.From.Id == 650818972)
+                if (message.Text.Split(' ')[0].Trim() == "/newcompetition")
                     try
                     {
                         if (AccessCompetition.Exists(message.Text.Split(' ', 3)[1].Trim()))
                         {
                             await vozCompetitionsBot.SendTextMessageAsync(
                                 message.Chat,
-                                $"Hashtag {message.Text.Split(' ', 3)[1].Trim()} đã tồn tại, vui lòng chọn hashtag khác.",
+                                $"Hashtag `{message.Text.Split(' ', 3)[1].Trim()}` already exists. Please choose another one.",
+                                ParseMode.Markdown,
                                 replyToMessageId: message.MessageId
                             );
                         }
@@ -54,6 +55,8 @@ namespace vozCompetitions
                         {
                             Competition competition = new Competition()
                             {
+                                UserId = message.From.Id,
+                                ChatId = message.Chat.Id,
                                 Hashtag = message.Text.Split(' ', 3)[1].Trim(),
                                 Name = message.Text.Split(' ', 3)[2].Trim(),
                                 Status = "Opening"
@@ -63,16 +66,18 @@ namespace vozCompetitions
 
                             await vozCompetitionsBot.SendTextMessageAsync(
                                 message.Chat,
-                                $"Cuộc thi: {competition.Name}\nHashtag: {competition.Hashtag}\n\nBẮT ĐẦU!!!",
+                                $"Cuộc thi: *{competition.Name}*\nHashtag: `{competition.Hashtag}`\n\nBẮT ĐẦU!!!",
+                                ParseMode.Markdown,
                                 replyToMessageId: message.MessageId
                             );
                         }
                     }
-                    catch (NullReferenceException)
+                    catch (IndexOutOfRangeException)
                     {
                         await vozCompetitionsBot.SendTextMessageAsync(
                             message.Chat,
-                            "Lỗi rồi bạn ey!",
+                            "Wrong format! Use this format to create a new competition:\n`/newcompetition #hashtag Name of the cometition`",
+                            ParseMode.Markdown,
                             replyToMessageId: message.MessageId
                         );
                     }
@@ -83,15 +88,16 @@ namespace vozCompetitions
             if (message.Text != null)
                 if (message.Text == "/listcompetition")
                 {
-                    string listCompetitions = "DANH SÁCH CÁC CUỘC THI\n\n";
+                    string listCompetitions = "COMPETITION LIST\n\n";
                     int count = 0;
                     foreach (Competition competition in AccessCompetition.Get())
-                    {
-                        count++;
-                        listCompetitions += $"[{count}] {competition.Hashtag} - {competition.Name} - {competition.Status}\n\n";
-                    }
+                        if (competition.ChatId == message.Chat.Id)
+                        {
+                            count++;
+                            listCompetitions += $"[{count}] {competition.Hashtag} - {competition.Name} - {competition.Status}\n\n";
+                        }
                     if (count == 0)
-                        listCompetitions += "Chưa có cuộc thi nào.";
+                        listCompetitions += "There's no competition in this chat.";
 
                     await vozCompetitionsBot.SendTextMessageAsync(
                         message.Chat,
@@ -101,18 +107,19 @@ namespace vozCompetitions
                 }
 
 
-            // CLOSE COMPETITION - - My Telegram ID: 650818972
+            // CLOSE COMPETITION - Only the owner can close his competition
             // Command format: /close #hashtag
             if (message.Text != null)
-                if (message.Text.Split(' ')[0].Trim() == "/close" && message.From.Id == 650818972)
+                if (message.Text.Split(' ')[0].Trim() == "/close")
                     try
                     {
-                        bool found = AccessCompetition.Close(message.Text.Split(' ')[1].Trim());
-                        if (found)
+                        string hashtag = message.Text.Split(' ')[1].Trim();
+                        bool found = AccessCompetition.Close(hashtag);
+                        if (found && message.From.Id == AccessCompetition.GetOwner(hashtag))
                         {
                             await vozCompetitionsBot.SendTextMessageAsync(
                                 message.Chat,
-                                "Kết thúc cuộc thi!",
+                                "Competition closed successfully!",
                                 replyToMessageId: message.MessageId
                             );
                         }
@@ -120,12 +127,20 @@ namespace vozCompetitions
                         {
                             await vozCompetitionsBot.SendTextMessageAsync(
                                 message.Chat,
-                                "Cuộc thi này không tồn tại!",
+                                "This competition doesn't exist or you're not the owner!",
                                 replyToMessageId: message.MessageId
                             );
                         }
                     }
-                    catch (IndexOutOfRangeException) { }
+                    catch (IndexOutOfRangeException)
+                    {
+                        await vozCompetitionsBot.SendTextMessageAsync(
+                            message.Chat,
+                            "Wrong format! Use this format close your competition:\n`/close #hashtag`",
+                            ParseMode.Markdown,
+                            replyToMessageId: message.MessageId
+                        );
+                    }
 
 
             // ADD NEW SUBMISSION
@@ -149,16 +164,16 @@ namespace vozCompetitions
 
                         await vozCompetitionsBot.SendTextMessageAsync(
                             message.Chat,
-                            $"Bình chọn cho {message.From.FirstName} {message.From.LastName} @{message.From.Username}",
+                            $"Vote for {message.From.FirstName} {message.From.LastName} @{message.From.Username}",
                             replyToMessageId: message.MessageId,
-                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Bình chọn - 0", hashtag))
+                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Vote - 0", hashtag))
                         );
                     }
                     else
                     {
                         await vozCompetitionsBot.SendTextMessageAsync(
                             message.Chat,
-                            "Cuộc thi này đã kết thúc, chậm chân ròi comrade ey.",
+                            "This competition already ended.",
                             replyToMessageId: message.MessageId
                         );
                     }
@@ -172,10 +187,14 @@ namespace vozCompetitions
                     try
                     {
                         string hashtag = message.Text.Split(' ')[1].Trim();
-                        string listSubmissions = $"KẾT QUẢ HIỆN TẠI - {hashtag}\n\n";
+                        string listSubmissions = $"CURRENT RESULT - `{hashtag}`\n\n";
+                        string chaturl;
+                        if (message.Chat.Username != null)
+                            chaturl = message.Chat.Username;
+                        else chaturl = $"c/{- message.Chat.Id - 1000000000000}";
                         foreach (Submission submission in AccessSubmission.Get())
                             if (submission.CompetitionHashtag == hashtag)
-                                listSubmissions += $"*Điểm: {submission.Point}* - {submission.UserInfo} - [Xem hình](https://t.me/{message.Chat.Username}/{submission.MessageId})\n";
+                                listSubmissions += $"*POINT: {submission.Point}* - {submission.UserInfo} - [See photo](https://t.me/{chaturl}/{submission.MessageId})\n";
 
                         await vozCompetitionsBot.SendTextMessageAsync(
                             message.Chat,
@@ -185,7 +204,15 @@ namespace vozCompetitions
                             replyToMessageId: message.MessageId
                         );
                     }
-                    catch (IndexOutOfRangeException) { }
+                    catch (IndexOutOfRangeException)
+                    {
+                        await vozCompetitionsBot.SendTextMessageAsync(
+                            message.Chat,
+                            "Wrong format! Use this format to check current result of a competition:\n`/result #hashtag`",
+                            ParseMode.Markdown,
+                            replyToMessageId: message.MessageId
+);
+                    }
         }
 
         static async void Bot_OnCallbackQuery(object sender, CallbackQueryEventArgs callbackQueryEvent)
@@ -201,7 +228,7 @@ namespace vozCompetitions
             if (AccessCompetition.GetStatus(callback.Data) == "Opening")
                 if (AccessVote.Exists(vote))
                 {
-                    await vozCompetitionsBot.AnswerCallbackQueryAsync(callback.Id, "Bạn đã bình chọn rồi!");
+                    await vozCompetitionsBot.AnswerCallbackQueryAsync(callback.Id, "You already voted for this!");
                 }
                 else
                 {
@@ -216,18 +243,18 @@ namespace vozCompetitions
                             break;
                         }
 
-                    await vozCompetitionsBot.AnswerCallbackQueryAsync(callback.Id, "Bình chọn thành công!");
+                    await vozCompetitionsBot.AnswerCallbackQueryAsync(callback.Id, "Thank you!");
 
                     await vozCompetitionsBot.EditMessageTextAsync(
                         callback.Message.Chat,
                         callback.Message.MessageId,
-                        $"Bình chọn cho {callback.Message.ReplyToMessage.From.FirstName} {callback.Message.ReplyToMessage.From.LastName} @{callback.Message.ReplyToMessage.From.Username}",
-                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData($"Bình chọn - {point}", callback.Data))
+                        $"Vote for {callback.Message.ReplyToMessage.From.FirstName} {callback.Message.ReplyToMessage.From.LastName} @{callback.Message.ReplyToMessage.From.Username}",
+                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData($"Vote - {point}", callback.Data))
                     );
                 }
             else
             {
-                await vozCompetitionsBot.AnswerCallbackQueryAsync(callback.Id, "Cuộc thi này đã kết thúc!");
+                await vozCompetitionsBot.AnswerCallbackQueryAsync(callback.Id, "This competition already ended!");
             }
         }
     }
