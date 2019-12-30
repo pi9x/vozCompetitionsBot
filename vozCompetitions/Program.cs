@@ -156,6 +156,7 @@ namespace vozCompetitions
                             CompetitionHashtag = hashtag,
                             UserId = message.From.Id,
                             UserInfo = $"{message.From.FirstName} {message.From.LastName} @{message.From.Username}",
+                            ChatId = message.Chat.Id,
                             MessageId = message.MessageId,
                             Point = 0
                         };

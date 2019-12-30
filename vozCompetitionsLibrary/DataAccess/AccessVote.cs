@@ -26,7 +26,7 @@ namespace vozCompetitionsLibrary.DataAccess
         {
             bool exists = false;
             foreach (Vote v in Get())
-                if (v.MessageId == vote.MessageId && v.UserId == vote.UserId)
+                if (v == vote)
                 {
                     exists = true;
                     break;
